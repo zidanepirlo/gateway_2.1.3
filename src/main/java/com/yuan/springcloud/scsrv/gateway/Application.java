@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 				EurekaClientAutoConfiguration.class
 		})
 @MapperScan(basePackages = "com.yuan.springcloud.scsrv.gateway.dao.domain.**",sqlSessionFactoryRef = "sqlSessionFactory")
+//@MapperScan(basePackages = "com.yuan.springcloud.scsrv.gateway.dao.domain.**")
 public class Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);

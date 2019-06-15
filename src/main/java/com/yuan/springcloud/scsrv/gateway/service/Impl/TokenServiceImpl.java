@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * @author yuanqing
  * @create 2019-04-10 18:53
  **/
-@Service
+//@Service
 public class TokenServiceImpl implements ItokenService {
 
     @Autowired

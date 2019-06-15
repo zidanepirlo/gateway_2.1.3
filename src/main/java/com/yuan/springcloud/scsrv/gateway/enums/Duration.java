@@ -19,6 +19,18 @@ public enum Duration {
     THREE_HOUR,
     ONE_DAY;
 
+    public static Duration getDuration(String desc){
+
+        Duration result = Duration.TEN_MIN;
+        for (Duration duration:Duration.values()){
+            if (desc.equals(duration.toString())){
+                return duration;
+            }
+        }
+
+        return result;
+    }
+
     public static Duration findDuration(int minute) {
         switch (minute) {
             case 1:

@@ -1,9 +1,8 @@
-package com.yuan.springcloud.scsrv.gateway.gateway_213;
+package com.yuan.springcloud.scsrv.gateway.gateway;
 
 import com.yuan.springcloud.scsrv.gateway.Application;
 import com.yuan.springcloud.scsrv.gateway.common.JwtUtils;
 import com.yuan.springcloud.scsrv.gateway.dao.entity.UserLogin;
-import com.yuan.springcloud.scsrv.gateway.enums.Duration;
 import com.yuan.springcloud.scsrv.gateway.service.IUserLoginService;
 import com.yuan.springcloud.scsrv.gateway.utils.JedisManager;
 import org.junit.Test;
@@ -25,6 +24,9 @@ public class testService {
 
 	@Autowired
 	private JedisManager jedisManager;
+
+	@Autowired
+	private JwtUtils JwtUtils;
 
 	@Test
 	public void testInsertUserLogin(){

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -35,6 +36,21 @@ public class RefreshAccessTokenGatewayFilterFactory extends AbstractGatewayFilte
 
     @Autowired
     private JedisManager jedisManager;
+
+    @Autowired
+    private JwtUtils JwtUtils;
+
+    @Value("${AccessToken.StoreTime.Unit}")
+    private String AccessTokenStoreTimeUnit;
+
+    @Value("${AccessToken.StoreTime.Value}")
+    private String AccessTokenStoreTimeValue;
+
+    @Value("${RefreshToken.StoreTime.Unit}")
+    private String RefreshTokenStoreTimeUnit;
+
+    @Value("${RefreshToken.StoreTime.Value}")
+    private String RefreshTokenStoreTimeValue;
 
     @Override
     public List<String> shortcutFieldOrder() {
@@ -102,9 +118,13 @@ public class RefreshAccessTokenGatewayFilterFactory extends AbstractGatewayFilte
       String accessToken = JwtUtils.createAccessToken(refreshTokenBaseFieldValue);
         JwtEntity jwtEntity = new JwtEntity(accessToken, refreshToken,refreshTokenBaseFieldValue);
         String jsonJwtEntity = JsonUtil.toJSONString(jwtEntity);
-        jedisManager.putValue(accessToken,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+//        jedisManager.putValue(accessToken,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+        jedisManager.putValue(accessToken,accessToken,3,
+                TokenDuration.getTokenDuration(AccessTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(AccessTokenStoreTimeValue));
         jedisManager.delValue(refreshTokenBaseFieldValue);
-        jedisManager.putValue(refreshTokenBaseFieldValue,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+//        jedisManager.putValue(refreshTokenBaseFieldValue,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+        jedisManager.putValue(refreshToken,refreshToken,3,
+                TokenDuration.getTokenDuration(RefreshTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(RefreshTokenStoreTimeValue));
 
         return accessToken;
     }

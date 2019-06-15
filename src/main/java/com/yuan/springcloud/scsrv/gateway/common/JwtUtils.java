@@ -14,11 +14,20 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yuan.springcloud.scsrv.gateway.enums.JwtTokenVerify;
+import com.yuan.springcloud.scsrv.gateway.enums.TokenDuration;
+import com.yuan.springcloud.scsrv.gateway.filter.BuildTokenGatewayFilterFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /**
  * JwtUtils
@@ -26,15 +35,14 @@ import org.apache.commons.lang.StringUtils;
  * @author yuanqing
  * @create 2019-04-09 13:33
  **/
+@Configuration
 public class JwtUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     public static final ThreadLocal<JwtEntity> JWT_TOKEN_DATA = new ThreadLocal<>();
 
     private static String TOKEN_GENERATE_COLUMN = "USER_ID";
-
-    private  JwtUtils(){
-    }
 
     /**
      * APP登录Token的生成和解析
@@ -50,17 +58,26 @@ public class JwtUtils {
 //    private static final int CALENDARFIELD_REFRESH_TOKEN = Calendar.DATE;
 //    private static final int CALENDARINTERVAL_REFRESH_TOKEN = 5;
 
-    private static final int CALENDARFIELD_ACCESS_TOKEN = Calendar.MINUTE;
-    private static final int CALENDARINTERVAL_ACCESS_TOKEN = 5;
-    private static final int CALENDARFIELD_REFRESH_TOKEN = Calendar.MINUTE;
-    private static final int CALENDARINTERVAL_REFRESH_TOKEN = 15;
+    @Value("${AccessToken.LifePeriod.Unit}")
+    private String CALENDARFIELD_ACCESS_TOKEN;
 
-    public static String createAccessToken(String user_id) throws Exception{
-        return createToken(user_id,CALENDARFIELD_ACCESS_TOKEN,CALENDARINTERVAL_ACCESS_TOKEN,ASSCESS_TOKEN_SECRET);
+    @Value("${AccessToken.LifePeriod.Value}")
+    private String CALENDARINTERVAL_ACCESS_TOKEN;
+
+    @Value("${RefreshToken.LifePeriod.Unit}")
+    private String CALENDARFIELD_REFRESH_TOKEN;
+
+    @Value("${RefreshToken.LifePeriod.Value}")
+    private String CALENDARINTERVAL_REFRESH_TOKEN;
+
+    public  String createAccessToken(String user_id) throws Exception{
+        return createToken(user_id, TokenDuration.getTokenDuration(CALENDARFIELD_ACCESS_TOKEN).getCalendarDate(),
+                Integer.parseInt(CALENDARINTERVAL_ACCESS_TOKEN),ASSCESS_TOKEN_SECRET);
     }
 
-    public static String createRefreshToken(String user_id) throws Exception{
-        return createToken(user_id,CALENDARFIELD_REFRESH_TOKEN,CALENDARINTERVAL_REFRESH_TOKEN,REFRESH_TOKEN_SECRET);
+    public  String createRefreshToken(String user_id) throws Exception{
+        return createToken(user_id,TokenDuration.getTokenDuration(CALENDARFIELD_REFRESH_TOKEN).getCalendarDate(),
+                Integer.parseInt(CALENDARINTERVAL_REFRESH_TOKEN),REFRESH_TOKEN_SECRET);
     }
 
     /**
@@ -71,7 +88,7 @@ public class JwtUtils {
      * @param user_id
      *            登录成功后用户user_id, 参数user_id不可传空
      */
-    private static String createToken(String user_id,int calendarField,int calendarInterval,String SECRET) throws Exception {
+    public static String createToken(String user_id,int calendarField,int calendarInterval,String SECRET) throws Exception {
 
         if (StringUtils.isEmpty(user_id))
             throw new Exception("createToken exception,TOKEN_GENERATE_COLUMN is null!");

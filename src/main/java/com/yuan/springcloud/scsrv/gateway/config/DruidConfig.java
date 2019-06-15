@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 /**
  * The type Druid configuration.
  */
+
 @Configuration
 public class DruidConfig {
 
@@ -51,7 +52,7 @@ public class DruidConfig {
 	public DruidDataSource getDruidDataSource() {
 
 		DruidDataSource druidDataSource = new DruidDataSource();
-		return druidDataSource;
+		return  druidDataSource;
 	}
 
 

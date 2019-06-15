@@ -3,10 +3,7 @@ package com.yuan.springcloud.scsrv.gateway.filter;
 import com.yuan.springcloud.scsrv.gateway.common.JwtUtils;
 import com.yuan.springcloud.scsrv.gateway.entity.JwtEntity;
 import com.yuan.springcloud.scsrv.gateway.entity.TokenOpeResult;
-import com.yuan.springcloud.scsrv.gateway.enums.AuthStatus;
-import com.yuan.springcloud.scsrv.gateway.enums.Duration;
-import com.yuan.springcloud.scsrv.gateway.enums.TokenRefresh;
-import com.yuan.springcloud.scsrv.gateway.enums.TokenType;
+import com.yuan.springcloud.scsrv.gateway.enums.*;
 import com.yuan.springcloud.scsrv.gateway.utils.HttpUtils;
 import com.yuan.springcloud.scsrv.gateway.utils.JedisManager;
 import com.yuan.springcloud.scsrv.gateway.utils.JsonUtil;
@@ -15,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -28,13 +26,28 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Component("PreTokenProcessGatewayFilterFactory")
+@Component("BuildTokenGatewayFilterFactory")
 public class BuildTokenGatewayFilterFactory extends AbstractGatewayFilterFactory<BuildTokenGatewayFilterFactory.Config> {
 
     private static final Logger logger = LoggerFactory.getLogger(BuildTokenGatewayFilterFactory.class);
 
     @Autowired
     private JedisManager jedisManager;
+
+    @Autowired
+    private JwtUtils JwtUtils;
+
+    @Value("${AccessToken.StoreTime.Unit}")
+    private String AccessTokenStoreTimeUnit;
+
+    @Value("${AccessToken.StoreTime.Value}")
+    private String AccessTokenStoreTimeValue;
+
+    @Value("${RefreshToken.StoreTime.Unit}")
+    private String RefreshTokenStoreTimeUnit;
+
+    @Value("${RefreshToken.StoreTime.Value}")
+    private String RefreshTokenStoreTimeValue;
 
     public BuildTokenGatewayFilterFactory() {
         super(Config.class);
@@ -74,23 +87,33 @@ public class BuildTokenGatewayFilterFactory extends AbstractGatewayFilterFactory
             logger.info("BuildTokenGatewayFilterFactory_jwtEntity={}", jwtEntity);
 
             //store token to redis, 3 days in redis
-            String jsonJwtEntity = JsonUtil.toJSONString(jwtEntity);
+//            String jsonJwtEntity = JsonUtil.toJSONString(jwtEntity);
 
             //accessToken-> {accessToken, refreshToken, buildTokenFieldValue}
-            jedisManager.putValue(accessToken,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
-            //refreshToken-> {refreshToken}
-            jedisManager.putValue(refreshToken,refreshToken,3, Duration.ONE_DAY.getMilliSeconds()*10);
-            //buildTokenFieldValue-> {accessToken, refreshToken, buildTokenFieldValue}
-            jedisManager.delValue(buildTokenBaseFieldValue);
-            jedisManager.putValue(buildTokenBaseFieldValue,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+//            jedisManager.putValue(accessToken,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
 
-            if (logger.isDebugEnabled()){
-                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_accessToken={}", jwtEntity);
-                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_refreshToken={}", refreshToken);
-                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_accessToken={}",jedisManager.getValueByKey(accessToken,3));
-                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_refreshToken={}",jedisManager.getValueByKey(refreshToken,3));
-                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_buildTokenBaseFieldValue={}",jedisManager.getValueByKey(buildTokenBaseFieldValue,3));
-            }
+            jedisManager.putValue(accessToken,accessToken,3,
+                    TokenDuration.getTokenDuration(AccessTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(AccessTokenStoreTimeValue));
+
+            //refreshToken-> {refreshToken}
+//            jedisManager.putValue(refreshToken,refreshToken,3, Duration.ONE_DAY.getMilliSeconds()*10);
+            jedisManager.putValue(refreshToken,refreshToken,3,
+                    TokenDuration.getTokenDuration(RefreshTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(RefreshTokenStoreTimeValue));
+
+            //buildTokenFieldValue-> {accessToken, refreshToken, buildTokenFieldValue}
+//            jedisManager.delValue(buildTokenBaseFieldValue);
+
+//            jedisManager.putValue(buildTokenBaseFieldValue,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
+//            jedisManager.putValue(buildTokenBaseFieldValue,jsonJwtEntity,3,
+//                    Duration.getDuration(AccessTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(AccessTokenStoreTimeValue) );
+
+//            if (logger.isDebugEnabled()){
+//                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_accessToken={}", jwtEntity);
+//                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_refreshToken={}", refreshToken);
+//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_accessToken={}",jedisManager.getValueByKey(accessToken,3));
+//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_refreshToken={}",jedisManager.getValueByKey(refreshToken,3));
+//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_buildTokenBaseFieldValue={}",jedisManager.getValueByKey(buildTokenBaseFieldValue,3));
+//            }
 
             //store token to response http header,return for app store
             HttpUtils.saveRespHeaderToken(exchange.getResponse(),TokenType.ACCESS_TOKEN,accessToken);
