@@ -42,7 +42,13 @@ public class JwtUtils {
 
     public static final ThreadLocal<JwtEntity> JWT_TOKEN_DATA = new ThreadLocal<>();
 
+    public static final String TOKEN_ALGORITHM_HS256 ="HS256";
+
+    public static final String TOKEN_ALGORITHM_RS256 ="RS256";
+
     private static String TOKEN_GENERATE_COLUMN = "USER_ID";
+
+
 
     /**
      * APP登录Token的生成和解析
@@ -72,12 +78,12 @@ public class JwtUtils {
 
     public  String createAccessToken(String user_id) throws Exception{
         return createToken(user_id, TokenDuration.getTokenDuration(CALENDARFIELD_ACCESS_TOKEN).getCalendarDate(),
-                Integer.parseInt(CALENDARINTERVAL_ACCESS_TOKEN),ASSCESS_TOKEN_SECRET);
+                Integer.parseInt(CALENDARINTERVAL_ACCESS_TOKEN),ASSCESS_TOKEN_SECRET,TOKEN_ALGORITHM_HS256);
     }
 
     public  String createRefreshToken(String user_id) throws Exception{
         return createToken(user_id,TokenDuration.getTokenDuration(CALENDARFIELD_REFRESH_TOKEN).getCalendarDate(),
-                Integer.parseInt(CALENDARINTERVAL_REFRESH_TOKEN),REFRESH_TOKEN_SECRET);
+                Integer.parseInt(CALENDARINTERVAL_REFRESH_TOKEN),REFRESH_TOKEN_SECRET,TOKEN_ALGORITHM_HS256);
     }
 
     /**
@@ -88,7 +94,7 @@ public class JwtUtils {
      * @param user_id
      *            登录成功后用户user_id, 参数user_id不可传空
      */
-    public static String createToken(String user_id,int calendarField,int calendarInterval,String SECRET) throws Exception {
+    public static String createToken(String user_id,int calendarField,int calendarInterval,String SECRET,String tokenAlgorithm) throws Exception {
 
         if (StringUtils.isEmpty(user_id))
             throw new Exception("createToken exception,TOKEN_GENERATE_COLUMN is null!");
@@ -100,7 +106,7 @@ public class JwtUtils {
 
         // header Map
         Map<String, Object> map = new HashMap<>();
-        map.put("alg", "HS256");
+        map.put("alg", tokenAlgorithm);
         map.put("typ", "JWT");
 
         // build token
@@ -202,13 +208,14 @@ public class JwtUtils {
      * @param token
      * @return user_id
      */
-    private static Long getAppUID(String token,String SECRET) throws Exception {
+    public static String analysisToken(String token,String SECRET) throws Exception {
         Map<String, Claim> claims = verifyTokenV1(token,SECRET);
         Claim user_id_claim = claims.get(TOKEN_GENERATE_COLUMN);
         if (null == user_id_claim || StringUtils.isEmpty(user_id_claim.asString())) {
             // token 校验失败, 抛出Token验证非法异常
+            throw new Exception("JWT Token check fail!");
         }
-        return Long.valueOf(user_id_claim.asString());
+        return user_id_claim.asString();
     }
 
 //    public static Claims parseJwtToken(String token,String SECRET) {
