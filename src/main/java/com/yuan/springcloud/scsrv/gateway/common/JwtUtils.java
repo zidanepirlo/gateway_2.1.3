@@ -70,20 +70,9 @@ public class JwtUtils {
     @Value("${AccessToken.LifePeriod.Value}")
     private String CALENDARINTERVAL_ACCESS_TOKEN;
 
-    @Value("${RefreshToken.LifePeriod.Unit}")
-    private String CALENDARFIELD_REFRESH_TOKEN;
-
-    @Value("${RefreshToken.LifePeriod.Value}")
-    private String CALENDARINTERVAL_REFRESH_TOKEN;
-
     public  String createAccessToken(String user_id) throws Exception{
         return createToken(user_id, TokenDuration.getTokenDuration(CALENDARFIELD_ACCESS_TOKEN).getCalendarDate(),
                 Integer.parseInt(CALENDARINTERVAL_ACCESS_TOKEN),ASSCESS_TOKEN_SECRET,TOKEN_ALGORITHM_HS256);
-    }
-
-    public  String createRefreshToken(String user_id) throws Exception{
-        return createToken(user_id,TokenDuration.getTokenDuration(CALENDARFIELD_REFRESH_TOKEN).getCalendarDate(),
-                Integer.parseInt(CALENDARINTERVAL_REFRESH_TOKEN),REFRESH_TOKEN_SECRET,TOKEN_ALGORITHM_HS256);
     }
 
     /**

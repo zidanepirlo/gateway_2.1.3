@@ -129,6 +129,6 @@ AccessToken:
     Value: 1
   LifePeriod:
     Unit: MINUTE
-    Value: 30
+    Value: 10
 
 LOG_HOME: /Users/yuan/logs/gateway

@@ -43,11 +43,6 @@ public class BuildTokenGatewayFilterFactory extends AbstractGatewayFilterFactory
     @Value("${AccessToken.StoreTime.Value}")
     private String AccessTokenStoreTimeValue;
 
-    @Value("${RefreshToken.StoreTime.Unit}")
-    private String RefreshTokenStoreTimeUnit;
-
-    @Value("${RefreshToken.StoreTime.Value}")
-    private String RefreshTokenStoreTimeValue;
 
     public BuildTokenGatewayFilterFactory() {
         super(Config.class);
@@ -80,44 +75,12 @@ public class BuildTokenGatewayFilterFactory extends AbstractGatewayFilterFactory
             }
             //get token
             String accessToken = JwtUtils.createAccessToken(buildTokenBaseFieldValue);
-            String refreshToken = JwtUtils.createRefreshToken(buildTokenBaseFieldValue);
-
-            //store token to ThreadLocal
-            JwtEntity jwtEntity = new JwtEntity(accessToken, refreshToken,buildTokenBaseFieldValue);
-            logger.info("BuildTokenGatewayFilterFactory_jwtEntity={}", jwtEntity);
-
-            //store token to redis, 3 days in redis
-//            String jsonJwtEntity = JsonUtil.toJSONString(jwtEntity);
-
-            //accessToken-> {accessToken, refreshToken, buildTokenFieldValue}
-//            jedisManager.putValue(accessToken,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
 
             jedisManager.putValue(accessToken,accessToken,3,
                     TokenDuration.getTokenDuration(AccessTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(AccessTokenStoreTimeValue));
 
-            //refreshToken-> {refreshToken}
-//            jedisManager.putValue(refreshToken,refreshToken,3, Duration.ONE_DAY.getMilliSeconds()*10);
-            jedisManager.putValue(refreshToken,refreshToken,3,
-                    TokenDuration.getTokenDuration(RefreshTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(RefreshTokenStoreTimeValue));
-
-            //buildTokenFieldValue-> {accessToken, refreshToken, buildTokenFieldValue}
-//            jedisManager.delValue(buildTokenBaseFieldValue);
-
-//            jedisManager.putValue(buildTokenBaseFieldValue,jsonJwtEntity,3, Duration.ONE_DAY.getMilliSeconds()*10);
-//            jedisManager.putValue(buildTokenBaseFieldValue,jsonJwtEntity,3,
-//                    Duration.getDuration(AccessTokenStoreTimeUnit).getMilliSeconds()*Integer.valueOf(AccessTokenStoreTimeValue) );
-
-//            if (logger.isDebugEnabled()){
-//                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_accessToken={}", jwtEntity);
-//                logger.info("BuildTokenGatewayFilterFactory_redis_redis_store_refreshToken={}", refreshToken);
-//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_accessToken={}",jedisManager.getValueByKey(accessToken,3));
-//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_refreshToken={}",jedisManager.getValueByKey(refreshToken,3));
-//                logger.info("BuildTokenGatewayFilterFactory_get_from_redis_buildTokenBaseFieldValue={}",jedisManager.getValueByKey(buildTokenBaseFieldValue,3));
-//            }
-
             //store token to response http header,return for app store
             HttpUtils.saveRespHeaderToken(exchange.getResponse(),TokenType.ACCESS_TOKEN,accessToken);
-            HttpUtils.saveRespHeaderToken(exchange.getResponse(),TokenType.REFRESH_TOKEN,refreshToken);
 
         }catch (Throwable throwable){
             logger.error(throwable.getMessage(),throwable);

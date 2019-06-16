@@ -51,32 +51,10 @@ public class ClearTokenGatewayFilterFactory extends AbstractGatewayFilterFactory
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             try {
-
                 String accessToken = HttpUtils.parseHeaderToken(exchange.getRequest().getHeaders(), TokenType.ACCESS_TOKEN.toString());
-                String refreshToken = HttpUtils.parseHeaderToken(exchange.getRequest().getHeaders(), TokenType.REFRESH_TOKEN.toString());
-                String clearTokenBaseField = HttpUtils.parseQueryParams(exchange.getRequest(), config.getClearTokenBaseFieldName());
-
-                if (!StringUtils.isEmpty(clearTokenBaseField)) {
-
-                    if (!StringUtils.isEmpty(accessToken) && !StringUtils.isEmpty(refreshToken)) {
-
-                        jedisManager.delValue(accessToken);
-                        jedisManager.delValue(refreshToken);
-                        jedisManager.delValue(clearTokenBaseField);
-                    }
-                    else {
-
-                        String tokenStoreJson = jedisManager.getValueByKey(clearTokenBaseField, 3);
-                        JwtEntity jwtEntity = JSON.parseObject(tokenStoreJson, new TypeReference<JwtEntity>() {
-                        });
-                        jedisManager.delValue(jwtEntity.getAccessToken());
-                        jedisManager.delValue(jwtEntity.getRefreshToken());
-                        jedisManager.delValue(clearTokenBaseField);
-                    }
-                } else {
-                    logger.error("ClearTokenGatewayFilterFactory clearTokenBaseField is null!");
+                if(StringUtils.isEmpty(accessToken)){
+                    jedisManager.delValue(accessToken);
                 }
-
             } catch (Throwable throwable) {
                 logger.error(throwable.getMessage(), throwable);
             }

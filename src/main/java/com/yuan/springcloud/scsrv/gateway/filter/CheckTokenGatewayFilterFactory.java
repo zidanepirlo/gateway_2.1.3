@@ -64,11 +64,10 @@ public  class CheckTokenGatewayFilterFactory extends AbstractGatewayFilterFactor
                     tokenOpeResult.setDetailMsg(config.tokenType == TokenType.ACCESS_TOKEN ?
                             TokenCheck.ACCESS_TOKEN_NOT_SEND_BY_CLIENT.toString() : TokenCheck.REFRESH_TOKEN_NOT_SEND_BY_CLIENT.toString());
                     break;
-                case 2: //can not get TOKEN from cache
+                case 2: //can not get token from cache
                     tokenOpeResult.setResultMsg(AuthStatus.AUTH_RELOGIN.toString());
                     tokenOpeResult.setDetailMsg(config.tokenType == TokenType.ACCESS_TOKEN ?
                             TokenCheck.ACCESS_TOKEN_NOT_EXISTED.toString() : TokenCheck.REFRESH_TOKEN_NOT_EXISTED.toString());
-                    break;
                 case 3: //token is expired
                     tokenOpeResult.setResultMsg(AuthStatus.REFRESH_TOKEN.toString());
                     tokenOpeResult.setDetailMsg(config.tokenType == TokenType.ACCESS_TOKEN ?
@@ -104,8 +103,8 @@ public  class CheckTokenGatewayFilterFactory extends AbstractGatewayFilterFactor
         if (StringUtils.isEmpty(token)) {
             return 1;
         }
-        //can not get TOKEN from cache
-        else if (null == jedisManager.getValueByKey(token, 3)) {
+        //can not get token from cache
+        else if (null==jedisManager.getValueByKey(token,3)){
             return 2;
         }
         //token is expired
