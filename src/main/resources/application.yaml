@@ -43,14 +43,6 @@ spring:
               - java.util.concurrent.TimeoutException
               - java.lang.NullPointerException
 
-      - id: TOKEN_SRV
-        uri: lb://SCSRV
-        predicates:
-        - Path=/token_Fresh/**
-        filters:
-        - StripPrefix=1
-        - RefreshAccessToken=user_id
-
       - id: SCSRV_USER
         uri: lb://SCSRV
         predicates:
