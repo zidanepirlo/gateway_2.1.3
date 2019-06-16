@@ -138,12 +138,5 @@ AccessToken:
   LifePeriod:
     Unit: MINUTE
     Value: 30
-RefreshToken:
-  StoreTime:
-    Unit: HOUR
-    Value: 1
-  LifePeriod:
-    Unit: MINUTE
-    Value: 35
 
 LOG_HOME: /Users/yuan/logs/gateway
