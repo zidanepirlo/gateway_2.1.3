@@ -39,7 +39,7 @@ public class testToken {
         String userId = "123456";
         String token = JwtUtils.createToken(userId, Calendar.MINUTE,30,"abcd",TOKEN_ALGORITHM_HS256);
         logger.info("token={}",token);
-        String userIdGet = JwtUtils.analysisToken(token,"abd");
+        String userIdGet = JwtUtils.analysisTokenByKey(token,"abcd","USER_ID");
         logger.info("userIdGet={}",userIdGet);
     }
 

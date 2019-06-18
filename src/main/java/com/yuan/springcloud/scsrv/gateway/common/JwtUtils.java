@@ -207,6 +207,18 @@ public class JwtUtils {
         return user_id_claim.asString();
     }
 
+
+    public static String analysisTokenByKey(String token,String SECRET,String key) throws Exception {
+        Map<String, Claim> claims = verifyTokenV1(token,SECRET);
+        Claim user_id_claim = claims.get(key);
+        if (null == user_id_claim || StringUtils.isEmpty(user_id_claim.asString())) {
+            // token 校验失败, 抛出Token验证非法异常
+            throw new Exception("JWT Token check fail!");
+        }
+        return user_id_claim.asString();
+    }
+
+
 //    public static Claims parseJwtToken(String token,String SECRET) {
 //        try{
 //
