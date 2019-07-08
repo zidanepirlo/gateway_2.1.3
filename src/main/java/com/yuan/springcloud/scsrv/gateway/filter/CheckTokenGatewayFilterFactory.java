@@ -55,7 +55,6 @@ public  class CheckTokenGatewayFilterFactory extends AbstractGatewayFilterFactor
                     config.tokenType == TokenType.ACCESS_TOKEN ? TokenType.ACCESS_TOKEN.toString() : TokenType.REFRESH_TOKEN.toString());
             int chkTokeResult = encodeChkTokenResult(token,config.tokenType);
             TokenOpeResult tokenOpeResult = new TokenOpeResult();
-
             switch (chkTokeResult){
                 case -1:
                     return chain.filter(exchange);

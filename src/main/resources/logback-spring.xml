@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration debug="false">
+<configuration scan="true" scanPeriod="60 seconds" >
 
+<!--    读取 properties 文件 LOG_HOME-->
     <springProperty scope="context" name="LOG_HOME" source="LOG_HOME"/>
 
-    <!--<property name="LOG_HOME" value="/Users/yuan/logs/gateway"/>-->
+
+<!--    <property name="LOG_HOME" value="/Users/yuan/logs/gateway"/>-->
 
     <!-- 控制台输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

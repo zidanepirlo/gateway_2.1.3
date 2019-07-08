@@ -1,12 +1,10 @@
 package com.yuan.springcloud.scsrv.gateway.common;
 
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.yuan.springcloud.scsrv.gateway.entity.JwtEntity;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -45,6 +43,10 @@ public class JwtUtils {
     public static final String TOKEN_ALGORITHM_HS256 ="HS256";
 
     public static final String TOKEN_ALGORITHM_RS256 ="RS256";
+
+    public static final String SECRET_KEY = "SECRET_KEY";
+
+    public static final String ENCRYP_FILELDS = "ENCRYP_FILELDS";
 
     private static String TOKEN_GENERATE_COLUMN = "USER_ID";
 
@@ -109,6 +111,42 @@ public class JwtUtils {
 
         return token;
     }
+
+    public static String createToken(Map<String,String> tokenBaseColumns,int calendarField,int calendarInterval,String SECRET,String tokenAlgorithm) throws Exception {
+
+        if (null==tokenBaseColumns || tokenBaseColumns.isEmpty())
+            throw new Exception("createToken exception,TOKEN_GENERATE_COLUMN is null!");
+        Date iatDate = new Date();
+        // expire time
+        Calendar nowTime = Calendar.getInstance();
+        nowTime.add(calendarField, calendarInterval);
+        Date expiresDate = nowTime.getTime();
+
+        // header Map
+        Map<String, Object> map = new HashMap<>();
+        map.put("alg", tokenAlgorithm);
+        map.put("typ", "JWT");
+
+        // build token
+        // param backups {iss:Service, aud:APP}
+
+        JWTCreator.Builder builder = JWT.create().withHeader(map) // header
+                .withClaim("iss", "Service") // payload
+                .withClaim("aud", "APP");
+
+        for (Map.Entry<String,String> entry : tokenBaseColumns.entrySet()) {
+            builder = builder.withClaim(entry.getKey(), entry.getValue());
+        }
+
+        String token = builder.withIssuedAt(iatDate) // sign time
+                .withExpiresAt(expiresDate) // expire time
+                .sign(Algorithm.HMAC256(SECRET)); // signature
+
+        return token;
+    }
+
+
+
 
     private static String createToken(String userName,String passWord,int calendarField,int calendarInterval,String SECRET) throws Exception {
         Date iatDate = new Date();
@@ -218,18 +256,26 @@ public class JwtUtils {
         return user_id_claim.asString();
     }
 
+    public static Map analysisTokenByKey(String token, String SECRET, List<String> keys) throws Exception {
 
-//    public static Claims parseJwtToken(String token,String SECRET) {
-//        try{
-//
-//            Jws<Claims> jws = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
-//            String signature = jws.getSignature();
-//            Map<String, String> header = jws.getHeader();
-//            Claims Claims = jws.getBody();
-//            return Claims;
-//        }catch (Exception ex){
-//            throw ex;
-//        }
-//    }
+        Map<String,String> result = new HashMap<>();
+        if (null == keys || keys.isEmpty()){
+            return result;
+        }
+        Map<String, Claim> claims = verifyTokenV1(token,SECRET);
+
+
+        for (String key:keys){
+
+            Claim claim = claims.get(key);
+            if (null == claim || StringUtils.isEmpty(claim.asString())) {
+                // token 校验失败, 抛出Token验证非法异常
+                throw new Exception("JWT Token check fail!");
+            }
+            result.put(key,claim.asString());
+        }
+
+        return result;
+    }
 
 }

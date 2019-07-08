@@ -2,7 +2,7 @@ eureka:
   client:
     fetch-registry: true
     register-with-eureka: true
-    registry-fetch-interval-seconds: 1
+    registry-fetch-interval-seconds: 5
   instance:
     lease-renewal-interval-in-seconds: 5
 management:
@@ -22,14 +22,13 @@ spring:
   cloud:
     gateway:
       routes:
-
       - id: SCSRV_TEST
         uri: lb://SCSRV
         predicates:
         - Path=/scsrv_Test/**
         filters:
         - StripPrefix=1
-        - CheckToken=ACCESS_TOKEN
+#        - CheckToken=ACCESS_TOKEN
         - name: Retry
           args:
             retries: 5
@@ -42,6 +41,9 @@ spring:
               - java.io.IOException
               - java.util.concurrent.TimeoutException
               - java.lang.NullPointerException
+
+        - name: Hystrix
+          -
 
       - id: SCSRV_USER
         uri: lb://SCSRV
@@ -78,6 +80,9 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    discovery:
+      enabled: true
+
   datasource:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
     driverClassName: com.mysql.jdbc.Driver
@@ -130,5 +135,3 @@ AccessToken:
   LifePeriod:
     Unit: MINUTE
     Value: 10
-
-LOG_HOME: /Users/yuan/logs/gateway
