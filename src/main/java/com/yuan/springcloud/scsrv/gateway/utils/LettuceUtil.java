@@ -16,18 +16,18 @@ import java.util.ArrayList;
  * @author yuanqing
  * @create 2019-03-06 08:33
  **/
-@Configuration
-@EnableConfigurationProperties(LettuceRedisProperties.class)
+//@Configuration
+//@EnableConfigurationProperties(LettuceRedisProperties.class)
 public class LettuceUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(LettuceUtil.class);
 
-    @Autowired
+//    @Autowired
     private LettuceRedisProperties lettuceRedisProperties;
 
     private ArrayList<RedisURI> redisUriList = new ArrayList<>();
 
-    @Bean
+//    @Bean
     public ArrayList<RedisURI> initRedisUriList(){
 
       String redisNodes = lettuceRedisProperties.getClusterNodes();

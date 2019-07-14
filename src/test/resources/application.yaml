@@ -41,12 +41,6 @@ spring:
               - java.io.IOException
               - java.util.concurrent.TimeoutException
               - java.lang.NullPointerException
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 1
-            redis-rate-limiter.burstCapacity: 1
-            key-resolver: "#{@ipKeyResolver}"
-
 
       - id: SCSRV_USER
         uri: lb://SCSRV
@@ -106,7 +100,6 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&serverTimezone=CTT
     username: root
     validationQuery: SELECT 1 FROM DUAL
-
   redis:
     cache:
       clusterNodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
@@ -125,6 +118,7 @@ spring:
       testWhileIdle: true
       timeBetweenEvictionRunsMillis: 60000
       timeout: 2000
+
 
     cluster:
       nodes: 127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005
@@ -155,11 +149,11 @@ spring:
 
 
 
-#lettuce:
-#  redis:
-#    autoReconnect: true
-#    clusterNodes: redis://127.0.0.1:7000,redis://127.0.0.1:7001,redis://127.0.0.1:7002,redis://127.0.0.1:7003,redis://127.0.0.1:7004,redis://127.0.0.1:7005
-#    maxRedirects: 3
+lettuce:
+  redis:
+    autoReconnect: true
+    clusterNodes: redis://127.0.0.1:7000,redis://127.0.0.1:7001,redis://127.0.0.1:7002,redis://127.0.0.1:7003,redis://127.0.0.1:7004,redis://127.0.0.1:7005
+    maxRedirects: 3
 
 AccessToken:
   StoreTime:
