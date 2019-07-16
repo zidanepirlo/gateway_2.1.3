@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
@@ -47,7 +48,7 @@ public class testRedis {
     private JedisManager jedisManager;
 
     @Autowired
-    private ReactiveRedisTemplate reactiveRedisTemplate;
+    private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -93,7 +94,7 @@ public class testRedis {
     }
 
     @Test
-    public void testRedisLua(){
+    public void testRedisLua() {
 
 //        DefaultRedisScript getRedisScript = new DefaultRedisScript<List>();
 //        getRedisScript.setResultType(List.class);
@@ -121,39 +122,51 @@ public class testRedis {
 //        String key1 = (String) redisTemplate.opsForValue().get("request_rate_limiter.{localhost}.tokens");
 //        logger.info("key1={}",key1);
 
-
         DefaultRedisScript getRedisScript = new DefaultRedisScript<List>();
         getRedisScript.setResultType(List.class);
         getRedisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("test_redis.lua")));
 
         List<String> keyList = new ArrayList();
-        keyList.add("request_rate_limiter.{localhost}.tokens");
-        keyList.add("request_rate_limiter.{localhost}.timestamp");
-//        keyList.add("{rate.limiting:127.0.0.1}");
+        keyList.add("{redis}.yuan1");
+        keyList.add("{redis}.qing1");
 
         /**
          * 用Mpa设置Lua的ARGV[1]
          */
-        Map<String,Object> argvMap = new HashMap<String,Object>();
-        argvMap.put("expire",10000);
-        argvMap.put("times",10);
+        Map<String, Object> argvMap = new HashMap<String, Object>();
+        argvMap.put("expire", 10000);
+        argvMap.put("times", 10);
 
 
         List<String> scriptArgs = new ArrayList<>();
-        scriptArgs.add("10");
-        scriptArgs.add("20");
-        scriptArgs.add("1562836423");
-        scriptArgs.add("1");
+        scriptArgs.add("1233");
+        scriptArgs.add("4566");
 
         /**
          * 调用脚本并执行
          */
 //        redisTemplate.execute(getRedisScript,keyList, argvMap);
 
-        reactiveRedisTemplate.execute(getRedisScript,keyList, scriptArgs);
+//        redisTemplate.setKeySerializer(new StringRedisSerializer());
+//        redisTemplate.setValueSerializer(new StringRedisSerializer());
+//        redisTemplate.execute(getRedisScript,keyList,"123","456");
+
+//        Flux<Void> flux = reactiveRedisTemplate.execute(getRedisScript,keyList, scriptArgs);
+//        flux.doOnError(throwable -> {
+//            logger.error(throwable.getMessage());
+//        }).subscribe();
+
+        reactiveRedisTemplate.execute(getRedisScript, keyList, scriptArgs).subscribe(o -> {
+            logger.info("result={}", o);
+        });
+
+//        reactiveRedisTemplate.opsForValue().get("{redis}.yuan").subscribe(o -> {
+//            logger.info("value9999={}", o);
+//        });
+//
+//        logger.info("value={}", redisTemplate.opsForValue().get("{redis}.yuan"));
 
     }
-
 
     @Test
     public void testRedisTemplate(){

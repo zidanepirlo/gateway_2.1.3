@@ -3,9 +3,11 @@ package com.yuan.springcloud.scsrv.gateway.utils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -24,6 +26,25 @@ import java.net.UnknownHostException;
  **/
 @Configuration
 public class RedisConfig {
+
+
+//    @Bean (name = "reactiveRedisTemplate")
+//    @ConditionalOnBean(ReactiveRedisConnectionFactory.class)
+//    public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(
+//            ReactiveRedisConnectionFactory reactiveRedisConnectionFactory,
+//            ResourceLoader resourceLoader) {
+//
+//        StringRedisSerializer redisSerializer = new StringRedisSerializer();
+//
+////        JdkSerializationRedisSerializer redisSerializer = new JdkSerializationRedisSerializer();
+//
+//        RedisSerializationContext<String, String> serializationContext = RedisSerializationContext.<String, String>newSerializationContext()
+//                .key(redisSerializer).value(redisSerializer)
+//                .hashKey(redisSerializer).hashValue(redisSerializer).build();
+//
+//        return new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory,
+//                serializationContext);
+//    }
 
 
 //    @Bean
